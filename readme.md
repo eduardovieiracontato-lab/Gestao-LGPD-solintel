@@ -1,3 +1,9 @@
+# Painel de Gestão LGPD — Solintel
+
+> **Fluxo de publicação (desde 24/10/2026):** este repositório está ligado ao Netlify.
+> Todo commit no branch `main` é publicado automaticamente em https://gestao-lgpd-solintel.netlify.app.
+> Mudanças de estrutura do banco (Supabase "Jornada LGPD") devem ser versionadas como SQL em `supabase/migrations/`.
+
 # Painel de Gestão LGPD — Solintel · Self-host (Supabase + Netlify)
 
 Aplicação web estática (HTML/CSS/JS puro) que persiste **todo o progresso no Supabase**
