@@ -1,0 +1,16 @@
+# ============================================================
+#  Netlify — Painel de Gestão LGPD (Solintel)
+#  Site estático. O build apenas (re)gera o env-config.js a partir das
+#  variáveis de ambiente, caso elas existam na Netlify. Se não existirem,
+#  usa o env-config.js já versionado no repositório.
+# ============================================================
+[build]
+  publish = "."
+  command = "sh build.sh"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
