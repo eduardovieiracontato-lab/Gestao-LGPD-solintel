@@ -266,6 +266,17 @@ footer .copy{max-width:var(--maxw);margin:34px auto 0;padding:20px 28px 0;border
 .userbox button:hover{border-color:var(--red);color:var(--red)}
 body.locked{overflow:hidden}
 @media print{.auth-overlay,.userbox{display:none!important}}
+/* ===== CARTEIRA: CANCELADAS / MIGRADAS ===== */
+#tblEmpresas tr.row-cancel{background:#f4f5f8}
+#tblEmpresas tr.row-cancel td{color:#8a92a3}
+#tblEmpresas tr.row-cancel td>*:not(.row-open){filter:grayscale(1);opacity:.6}
+#tblEmpresas tr.row-cancel b{color:#8a92a3}
+.cancel-tag{display:inline-block;background:#e2e5ec;color:#5b6473;font-size:10px;font-weight:800;letter-spacing:.5px;padding:2px 8px;border-radius:14px;text-transform:uppercase;margin-left:8px;vertical-align:middle}
+.cancel-tag.mig{background:#e1effa;color:#1d6f9c}
+.stat .sub{font-size:11.5px;color:var(--muted);position:relative;margin-top:3px}
+/* ===== SCM+ ===== */
+.scm-ref{display:inline-block;font-size:10.5px;font-weight:800;color:var(--accent-2);background:var(--bg-2);border-radius:6px;padding:1px 7px;margin-right:6px}
+.also-tag{display:inline-block;background:#eef1f8;color:var(--navy);font-size:10px;font-weight:700;padding:2px 8px;border-radius:14px;margin-left:8px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -299,6 +310,7 @@ body.locked{overflow:hidden}
       <a data-view="entregaveis">Entregáveis &amp; SLA</a>
       <a data-view="manual">Manual Operacional</a>
       <a data-view="empresas">Gestão de Empresas</a>
+      <a data-view="scm">Gestão SCM+</a>
     </nav>
     <div class="userbox" id="userbox" style="display:none"><span>👤 <b id="userEmail"></b></span><button id="btnLogout">Sair</button></div>
   </div>
@@ -390,7 +402,7 @@ body.locked{overflow:hidden}
     <div class="toolbar">
       <div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="searchInput" placeholder="Buscar por razão social ou CNPJ..."></div>
       <select id="filterAnalista"><option value="">Todos os analistas</option></select>
-      <select id="filterStatus"><option value="">Todos os status</option><option value="nao">Não iniciado</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select>
+      <select id="filterStatus"><option value="">Todos os status</option><option value="cancelada">Gestão cancelada / migrada</option><option value="nao">Não iniciado</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select>
       <button class="btn btn-out btn-sm" id="btnNovoAnalista">+ Analista</button>
       <button class="btn btn-out btn-sm" id="btnReload">⟳ Atualizar</button>
       <button class="btn btn-ac btn-sm" id="btnSyncSheet">⤓ Sincronizar planilha</button>
@@ -398,6 +410,25 @@ body.locked{overflow:hidden}
     </div>
     <div class="table-wrap"><div class="table-scroll"><table id="tblEmpresas"><thead><tr><th style="width:42px">#</th><th>Razão Social</th><th>Analista Responsável</th><th style="width:150px">Implantação</th><th>Status</th><th style="width:70px"></th></tr></thead><tbody></tbody></table></div></div>
     <div class="empty" id="emptyState" style="display:none">Nenhuma empresa encontrada com os filtros atuais.</div>
+  </div></section>
+</div>
+
+<div class="view" id="view-scm">
+  <section class="section"><div class="container">
+    <div class="eyebrow">Painel Gerencial · SCM+</div>
+    <h2 class="section-title">Gestão das Empresas SCM+</h2>
+    <p class="section-sub">Carteira da <b>Gestão Regulatória SCM+</b>. O checklist traz apenas os entregáveis de LGPD da <b>Quarta Modalidade</b> do objeto contratual SCM+ (cláusula 1.2.4, itens I a XXII) — escopo mais enxuto que a Gestão LGPD convencional.</p>
+    <div class="db-strip"><span class="dot" id="scmDot"></span><span id="scmStatus">Aguardando login...</span></div>
+    <div class="stat-row" id="scmStatRow"></div>
+    <div class="toolbar">
+      <div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="scmSearch" placeholder="Buscar por razão social ou CNPJ..."></div>
+      <select id="scmFilterAnalista"><option value="">Todos os analistas</option></select>
+      <select id="scmFilterStatus"><option value="">Todos os status</option><option value="nao">Não iniciado</option><option value="andamento">Em andamento</option><option value="concluido">Concluído</option></select>
+      <button class="btn btn-out btn-sm" id="scmReload">⟳ Atualizar</button>
+      <button class="btn btn-nv btn-sm" id="scmPrint">⎙ Imprimir</button>
+    </div>
+    <div class="table-wrap"><div class="table-scroll"><table id="tblScm"><thead><tr><th style="width:42px">#</th><th>Razão Social</th><th>Analista Responsável</th><th style="width:150px">Entregáveis LGPD</th><th>Status</th><th style="width:70px"></th></tr></thead><tbody></tbody></table></div></div>
+    <div class="empty" id="scmEmpty" style="display:none">Nenhuma empresa encontrada com os filtros atuais.</div>
   </div></section>
 </div>
 
@@ -413,7 +444,7 @@ body.locked{overflow:hidden}
     <div><h5>Plataforma</h5><ul><li data-view="jornada">Jornada de Implantação</li><li data-view="entregaveis">Entregáveis &amp; SLA</li><li data-view="manual">Manual Operacional</li><li data-view="empresas">Gestão de Empresas</li></ul></div>
     <div><h5>Conformidade</h5><ul><li>Lei nº 13.709/2018 (LGPD)</li><li>Boas práticas ANPD</li><li>Diretrizes ANATEL para ISPs</li><li>DPO as a Service</li></ul></div>
   </div>
-  <div class="copy"><div>© <span id="year"></span> Grupo Solintel · Dados persistidos em Supabase.</div><div>Painel de Gestão LGPD v3.0 · Supabase + Netlify</div></div>
+  <div class="copy"><div>© <span id="year"></span> Grupo Solintel · Dados persistidos em Supabase.</div><div>Painel de Gestão LGPD v3.1 · Supabase + Netlify</div></div>
 </footer>
 
 <div class="toast" id="toast"><span class="ic">✓</span><span id="toastMsg"></span></div>
@@ -516,6 +547,8 @@ const KICKOFF=[
 
 /* ====== SUPABASE DATA LAYER ====== */
 let SB=null, COMPANIES=[], ANALYSTS=[], CHECK={}, REC={};
+function isAtiva(c){return (c.carteira||'ativo')==='ativo';}
+function carteiraTag(c){if(c.carteira==='migrada_scm')return '<span class="cancel-tag mig">Migrada p/ SCM+</span>';if(c.carteira==='cancelada')return '<span class="cancel-tag">Gestão cancelada</span>';return '';}
 function isNova(c){return !!c.is_nova || (c.razao||'').toUpperCase().includes('XOX') || (c.razao||'').toUpperCase().includes('INTERFIBRAS');}
 function dbStatus(kind,msg){const d=document.getElementById('dbDot');const s=document.getElementById('dbStatus');d.className='dot'+(kind==='ok'?' ok':kind==='err'?' err':'');s.innerHTML=msg;}
 async function loadAll(){
@@ -526,7 +559,7 @@ async function loadAll(){
     SB.from('recurring_deliverables').select('*').order('created_at',{ascending:false})
   ]);
   if(c.error) throw c.error;
-  COMPANIES=(c.data||[]).map(r=>({id:r.id,cnpj:r.cnpj,razao:r.razao_social,analista:r.analista_responsavel,situacao:r.situacao,condicao:r.condicao||'',dpo_nome:r.dpo_nome||'',dpo_contato:r.dpo_contato||'',is_nova:r.is_nova,emails:r.emails||[]}));
+  COMPANIES=(c.data||[]).map(r=>({id:r.id,cnpj:r.cnpj,razao:r.razao_social,analista:r.analista_responsavel,situacao:r.situacao,condicao:r.condicao||'',dpo_nome:r.dpo_nome||'',dpo_contato:r.dpo_contato||'',is_nova:r.is_nova,emails:r.emails||[],carteira:r.status_carteira||'ativo'}));
   ANALYSTS=(a.data||[]).map(x=>x.nome); if(!ANALYSTS.length) ANALYSTS=['ISABELLA FARINA'];
   CHECK={}; (ci.data||[]).forEach(r=>{CHECK[r.company_id+':'+r.item_chave]={status:r.status||'nao',pendencia:r.pendencia||'',data:r.data||'',anotacoes:r.anotacoes||''};});
   REC={}; (rd.data||[]).forEach(r=>{(REC[r.company_id]=REC[r.company_id]||[]).push(r);});
@@ -594,15 +627,15 @@ function renderManual(){document.getElementById('manualPhases').innerHTML=PHASES
 
 /* ====== TABELA ====== */
 function analystOptions(sel){return ANALYSTS.map(a=>`<option ${a===sel?'selected':''}>${a}</option>`).join('');}
-function renderStats(){let nao=0,and=0,conc=0;COMPANIES.forEach(c=>{const k=statusOf(c.id).k;if(k==='nao')nao++;else if(k==='andamento')and++;else conc++;});document.getElementById('statRow').innerHTML=`<div class="stat cyan"><div class="n">${COMPANIES.length}</div><div class="l">Empresas em gestão</div></div><div class="stat"><div class="n">${nao}</div><div class="l">Não iniciadas</div></div><div class="stat amber"><div class="n">${and}</div><div class="l">Em andamento</div></div><div class="stat green"><div class="n">${conc}</div><div class="l">Implantação concluída</div></div>`;document.getElementById('kpiEmp').textContent=COMPANIES.length;}
+function renderStats(){let nao=0,and=0,conc=0;const ATIVAS=COMPANIES.filter(isAtiva);const inat=COMPANIES.length-ATIVAS.length;ATIVAS.forEach(c=>{const k=statusOf(c.id).k;if(k==='nao')nao++;else if(k==='andamento')and++;else conc++;});document.getElementById('statRow').innerHTML=`<div class="stat cyan"><div class="n">${ATIVAS.length}</div><div class="l">Empresas em gestão</div>${inat?`<div class="sub">+ ${inat} canceladas / migradas (em cinza)</div>`:''}</div><div class="stat"><div class="n">${nao}</div><div class="l">Não iniciadas</div></div><div class="stat amber"><div class="n">${and}</div><div class="l">Em andamento</div></div><div class="stat green"><div class="n">${conc}</div><div class="l">Implantação concluída</div></div>`;document.getElementById('kpiEmp').textContent=ATIVAS.length;}
 function renderTable(){
   const q=(document.getElementById('searchInput').value||'').toLowerCase().trim();
   const fa=document.getElementById('filterAnalista').value;
   const fs=document.getElementById('filterStatus').value;
   const tb=document.querySelector('#tblEmpresas tbody');
-  const rows=COMPANIES.filter(c=>{if(q&&!((c.razao||'').toLowerCase().includes(q)||(c.cnpj||'').toLowerCase().includes(q)))return false;if(fa&&dispAnalista(c)!==fa)return false;if(fs&&statusOf(c.id).k!==fs)return false;return true;});
+  const rows=COMPANIES.filter(c=>{if(q&&!((c.razao||'').toLowerCase().includes(q)||(c.cnpj||'').toLowerCase().includes(q)))return false;if(fa&&dispAnalista(c)!==fa)return false;if(fs==='cancelada')return !isAtiva(c);if(fs&&(!isAtiva(c)||statusOf(c.id).k!==fs))return false;return true;}).sort((a,b)=>(isAtiva(a)?0:1)-(isAtiva(b)?0:1)||a.id-b.id);
   document.getElementById('emptyState').style.display=rows.length?'none':'block';
-  tb.innerHTML=rows.map(c=>{const pr=progressFor(c.id),st=statusOf(c.id);return `<tr><td style="color:var(--muted);font-weight:700">${c.id}</td><td><b>${c.razao}</b>${isNova(c)?'<span class="nova-tag">Empresa Nova</span>':''}<div class="cnpj">${c.cnpj||'—'}</div></td><td class="analista-cell"><select data-emp="${c.id}" class="selAnalista">${analystOptions(dispAnalista(c))}</select></td><td><div style="display:flex;align-items:center;gap:9px"><div class="progress" style="flex:1"><i style="width:${pr.pct}%"></i></div><b style="font-size:12.5px;color:var(--navy)">${pr.pct}%</b></div></td><td><span class="status-badge ${st.cl}">${st.label}</span></td><td><span class="row-open" data-open="${c.id}">Abrir →</span></td></tr>`;}).join('');
+  tb.innerHTML=rows.map(c=>{const pr=progressFor(c.id),st=statusOf(c.id);return `<tr class="${isAtiva(c)?'':'row-cancel'}"><td style="color:var(--muted);font-weight:700">${c.id}</td><td><b>${c.razao}</b>${isNova(c)?'<span class="nova-tag">Empresa Nova</span>':''}${carteiraTag(c)}<div class="cnpj">${c.cnpj||'—'}</div></td><td class="analista-cell"><select data-emp="${c.id}" class="selAnalista">${analystOptions(dispAnalista(c))}</select></td><td><div style="display:flex;align-items:center;gap:9px"><div class="progress" style="flex:1"><i style="width:${pr.pct}%"></i></div><b style="font-size:12.5px;color:var(--navy)">${pr.pct}%</b></div></td><td><span class="status-badge ${st.cl}">${st.label}</span></td><td><span class="row-open" data-open="${c.id}">Abrir →</span></td></tr>`;}).join('');
   tb.querySelectorAll('.selAnalista').forEach(s=>s.addEventListener('change',async e=>{await saveCompany(+e.target.dataset.emp,{analista:e.target.value});renderTable();renderStats();toast('Analista responsável atualizado.');}));
   tb.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openDrawer(+b.dataset.open)));
 }
@@ -610,13 +643,13 @@ function renderFilters(){const sel=document.getElementById('filterAnalista');con
 
 /* ====== DRAWER ====== */
 let CURRENT=null;
-function openDrawer(id){CURRENT=id;const c=compById(id);document.getElementById('dEk').textContent='Empresa #'+c.id+' · '+statusOf(id).label;document.getElementById('dRazao').innerHTML=c.razao+(isNova(c)?'<span class="nova-tag">Empresa Nova</span>':'');document.getElementById('dCnpj').textContent=c.cnpj||'—';document.getElementById('dSituacao').textContent=c.situacao||'ATIVO';renderDrawerBody(id);document.getElementById('overlay').classList.add('open');document.getElementById('drawer').classList.add('open');}
-function closeDrawer(){document.getElementById('overlay').classList.remove('open');document.getElementById('drawer').classList.remove('open');CURRENT=null;renderTable();renderStats();}
+function openDrawer(id){CURRENT=id;const c=compById(id);document.getElementById('dEk').textContent='Empresa #'+c.id+' · '+statusOf(id).label;document.getElementById('dRazao').innerHTML=c.razao+(isNova(c)?'<span class="nova-tag">Empresa Nova</span>':'')+carteiraTag(c);document.getElementById('dCnpj').textContent=c.cnpj||'—';document.getElementById('dSituacao').textContent=c.situacao||'ATIVO';renderDrawerBody(id);document.getElementById('overlay').classList.add('open');document.getElementById('drawer').classList.add('open');}
+function closeDrawer(){document.getElementById('overlay').classList.remove('open');document.getElementById('drawer').classList.remove('open');const wasScm=SCM_CURRENT!==null;CURRENT=null;SCM_CURRENT=null;if(wasScm){renderScmAll();}else{renderTable();renderStats();}}
 function recStats(id){const r=REC[id]||[];const by={};let fin=0,late=0;r.forEach(x=>{by[x.tipo]=(by[x.tipo]||0)+1;if(x.status==='finalizado'){fin++;if(x.dentro_sla===false)late++;}});return{total:r.length,by,fin,abertos:r.length-fin,onTime:fin-late};}
 function renderDrawerBody(id){
   const c=compById(id);const pr=progressFor(id);
   const emails=(c.emails&&c.emails.length)?c.emails.map(m=>`<span class="email-chip">${m}</span>`).join(''):'<span style="color:var(--muted);font-size:13px">Sem e-mails cadastrados.</span>';
-  let html=`
+  let html=(isAtiva(c)?'':`<div class="note warn"><b>${c.carteira==='migrada_scm'?'Empresa migrada para a Gestão SCM+.':'Gestão cancelada.'}</b> O progresso registrado abaixo foi preservado para consulta.</div>`)+`
   <div class="drawer-actions"><button class="btn btn-ac btn-sm" id="btnDash">📊 Exportar Dashboard</button><button class="btn btn-out btn-sm" id="btnPrintDrawer">⎙ Imprimir ficha</button></div>
   <div class="field-row"><div class="field"><label>Analista Responsável</label><select id="dAnalista">${analystOptions(dispAnalista(c))}</select></div><div class="field"><label>Condição (observação)</label><input id="dCond" value="${(c.condicao||'').replace(/"/g,'&quot;')}" placeholder="ex.: Documentos enviados"></div></div>
   <div class="dpo-box"><div class="lbl">⛨ Encarregado de Dados (DPO) da Prestadora</div><div class="dpo-grid"><div><label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px">NOME COMPLETO</label><input id="dDpoNome" value="${(c.dpo_nome||'').replace(/"/g,'&quot;')}" placeholder="Nome completo do DPO"></div><div><label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px">CONTATO (e-mail / telefone)</label><input id="dDpoContato" value="${(c.dpo_contato||'').replace(/"/g,'&quot;')}" placeholder="email@empresa.com · (00) 0000-0000"></div></div></div>
@@ -688,7 +721,7 @@ function renderRecList(cid){
 function refreshRec(cid){const rs=recStats(cid);const stats=document.querySelector('.rec-stats');if(stats)stats.innerHTML=`<div class="rec-stat"><div class="n">${rs.total}</div><div class="l">Solicitações</div></div><div class="rec-stat"><div class="n">${rs.by.informativo||0}</div><div class="l">Informativos</div></div><div class="rec-stat"><div class="n">${rs.abertos}</div><div class="l">Em aberto</div></div><div class="rec-stat"><div class="n">${rs.fin?Math.round(rs.onTime/rs.fin*100):0}%</div><div class="l">No prazo</div></div>`;renderRecList(cid);}
 document.getElementById('drawerClose').addEventListener('click',closeDrawer);
 document.getElementById('overlay').addEventListener('click',closeDrawer);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&CURRENT)closeDrawer();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(CURRENT||SCM_CURRENT!==null))closeDrawer();});
 
 /* ====== DASHBOARD EXPORT ====== */
 function slug(s){return (s||'empresa').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);}
@@ -713,6 +746,122 @@ document.getElementById('btnNovoAnalista').addEventListener('click',async()=>{co
 document.getElementById('btnReload').addEventListener('click',async()=>{try{await loadAll();renderAll();toast('Dados atualizados do Supabase.');}catch(e){toast('Falha ao atualizar.');}});
 document.getElementById('btnSyncSheet').addEventListener('click',()=>syncSheet(false));
 document.getElementById('btnPrint').addEventListener('click',()=>window.print());
+
+
+/* ====== GESTÃO SCM+ (entregáveis LGPD — Quarta Modalidade, cl. 1.2.4) ====== */
+const SCM_GROUPS=[
+ {id:'s1',n:'1',nome:'Alinhamento & Estrutura Inicial',when:'Início da assessoria',fixo:true,items:[
+  {id:'sc01',ref:'I',nome:'Apresentação da assessoria em Reunião de Alinhamento Inicial',resp:'consultor',fmt:'Reunião'},
+  {id:'sc02',ref:'II',nome:'Liberação do Acesso SEI perante a ANPD',resp:'consultor',fmt:'Cadastro / acesso SEI'},
+  {id:'sc03',ref:'III',nome:'Orientações sobre a Definição do Encarregado (DPO)',resp:'consultor',fmt:'Orientação'},
+  {id:'sc06',ref:'VI',nome:'Definição do Procedimento de Incidentes',resp:'advogado',fmt:'Procedimento (PDF)'}]},
+ {id:'s2',n:'2',nome:'Cartilhas, Políticas & Contratos',when:'Implantação',fixo:true,items:[
+  {id:'sc04',ref:'IV',nome:'Cartilha de Mapeamento de Dados',resp:'consultor',fmt:'Cartilha (PDF)'},
+  {id:'sc05',ref:'V',nome:'Cartilha de Gestão de Risco',resp:'consultor',fmt:'Cartilha (PDF)'},
+  {id:'sc07',ref:'VII',nome:'Análise do site com adequação definitiva',resp:'advogado',fmt:'Devolutiva + texto web'},
+  {id:'sc08',ref:'VIII',nome:'Código de Ética em Proteção de Dados Pessoais',resp:'advogado',fmt:'Documento (PDF)'},
+  {id:'sc09',ref:'IX',nome:'Política de Governança e Boas Práticas em Tratamento de Dados',resp:'advogado',fmt:'Política (PDF)'},
+  {id:'sc10',ref:'X',nome:'Cartilha de cláusulas contratuais (contratos internos, externos e fornecedores)',resp:'advogado',fmt:'Cartilha (PDF)'},
+  {id:'sc20',ref:'XX',nome:'Contrato Controller-to-Controller',resp:'advogado',fmt:'Contrato (PDF)'},
+  {id:'sc21',ref:'XXI',nome:'Data Processing Agreement (DPA)',resp:'advogado',fmt:'Contrato (PDF)'}]},
+ {id:'s3',n:'3',nome:'Informativos',when:'Implantação',fixo:true,items:[
+  {id:'sc11',ref:'XI',nome:'Informativo sobre os Direitos dos Titulares',resp:'consultor',fmt:'Informativo'},
+  {id:'sc12',ref:'XII',nome:'Informativo sobre a Gestão do Consentimento',resp:'consultor',fmt:'Informativo'},
+  {id:'sc14',ref:'XIV',nome:'Informativo sobre a Anonimização de Dados',resp:'consultor',fmt:'Informativo'},
+  {id:'sc15',ref:'XV',nome:'Informativo sobre o tratamento de dados na Prospecção Ativa de clientes',resp:'consultor',fmt:'Informativo'}]},
+ {id:'s4',n:'↻',nome:'Sob demanda (não entra no percentual)',when:'Conforme solicitação',fixo:false,items:[
+  {id:'sc13',ref:'XIII',nome:'Notificações e respostas a solicitações de Titulares (exceto as privativas do DPO)',resp:'advogado',fmt:'Peça / resposta'},
+  {id:'sc16',ref:'XVI',nome:'Termos relativos à proteção de dados pessoais',resp:'advogado',fmt:'Termo'},
+  {id:'sc17',ref:'XVII',nome:'Ofícios, defesas e recursos administrativos perante a ANPD',resp:'advogado',fmt:'Peça'},
+  {id:'sc18',ref:'XVIII',nome:'Orientações e pesquisas diversas',resp:'consultor',fmt:'Orientação'},
+  {id:'sc19',ref:'XIX',nome:'Informativos relacionados às etapas da cláusula 1.2.4',resp:'consultor',fmt:'Informativo'},
+  {id:'sc22',ref:'XXII',nome:'Reuniões periódicas de alinhamento',resp:'consultor',fmt:'Reunião'}]}
+];
+const SCM_ITEMS=SCM_GROUPS.flatMap(g=>g.items.map(i=>({...i,group:g})));
+const SCM_FIXED=SCM_ITEMS.filter(i=>i.group.fixo);
+let SCM_COMPANIES=[], SCM_CHECK={}, SCM_CURRENT=null, SCM_READY=false;
+function scmStatusMsg(kind,msg){const d=document.getElementById('scmDot');const s=document.getElementById('scmStatus');d.className='dot'+(kind==='ok'?' ok':kind==='err'?' err':'');s.innerHTML=msg;}
+async function loadScm(){
+  const [c,ci]=await Promise.all([SB.from('scm_companies').select('*').order('id'),SB.from('scm_checklist_items').select('*')]);
+  if(c.error)throw c.error;if(ci.error)throw ci.error;
+  SCM_COMPANIES=(c.data||[]).map(r=>({id:r.id,cnpj:r.cnpj,razao:r.razao_social,analista:r.analista_responsavel||'',situacao:r.situacao||'ATIVO',condicao:r.condicao||'',dpo_nome:r.dpo_nome||'',dpo_contato:r.dpo_contato||'',is_nova:!!r.is_nova}));
+  SCM_CHECK={};(ci.data||[]).forEach(r=>{SCM_CHECK[r.company_id+':'+r.item_chave]={status:r.status||'nao',pendencia:r.pendencia||'',data:r.data||'',anotacoes:r.anotacoes||''};});
+}
+async function startScm(){
+  try{scmStatusMsg('','Carregando carteira SCM+...');await loadScm();SCM_READY=true;renderScmAll();scmStatusMsg('ok','Conectado · <b>'+SCM_COMPANIES.length+' empresas SCM+</b>');}
+  catch(e){scmStatusMsg('err','Erro ao carregar a carteira SCM+: '+(e.message||e));}
+}
+function scmComp(id){return SCM_COMPANIES.find(c=>c.id===id);}
+function scmState(cid,iid){return SCM_CHECK[cid+':'+iid]||{status:'nao',pendencia:'',data:'',anotacoes:''};}
+function scmProgress(cid){let done=0,app=0;SCM_FIXED.forEach(it=>{const st=scmState(cid,it.id).status;if(st==='na')return;app++;if(st==='concluido')done++;});return{pct:app?Math.round(done/app*100):0,done,applicable:app,total:SCM_FIXED.length};}
+function scmStatusOf(cid){const{pct,done}=scmProgress(cid);if(done===0)return{k:'nao',label:'Não iniciado',cl:'sb-nao'};if(pct>=100)return{k:'concluido',label:'Concluído',cl:'sb-concluido'};return{k:'andamento',label:'Em andamento',cl:'sb-andamento'};}
+async function scmSaveItem(cid,it,patch){
+  const key=cid+':'+it.id;const next={...scmState(cid,it.id),...patch};SCM_CHECK[key]=next;
+  const {error}=await SB.from('scm_checklist_items').upsert({company_id:cid,grupo:it.group.id,item_chave:it.id,status:next.status,pendencia:next.pendencia||'',data:next.data||null,anotacoes:next.anotacoes||'',updated_at:new Date().toISOString()},{onConflict:'company_id,item_chave'});
+  if(error)toast('Erro ao salvar: '+error.message);
+}
+async function scmSaveCompany(cid,patch){
+  const c=scmComp(cid);Object.assign(c,patch);
+  const m={analista:'analista_responsavel',condicao:'condicao',dpo_nome:'dpo_nome',dpo_contato:'dpo_contato'};
+  const db={};Object.keys(patch).forEach(k=>{if(m[k])db[m[k]]=patch[k];});
+  const {error}=await SB.from('scm_companies').update(db).eq('id',cid);
+  if(error)toast('Erro ao salvar: '+error.message);
+}
+function scmAnalysts(){const s=new Set(ANALYSTS);SCM_COMPANIES.forEach(c=>{if(c.analista)s.add(c.analista);});return Array.from(s).sort();}
+function scmAnalystOptions(sel){return scmAnalysts().map(a=>`<option ${a===sel?'selected':''}>${a}</option>`).join('');}
+function renderScmAll(){if(!SCM_READY)return;renderScmFilters();renderScmStats();renderScmTable();}
+function renderScmFilters(){const sel=document.getElementById('scmFilterAnalista');const cur=sel.value;sel.innerHTML='<option value="">Todos os analistas</option>'+scmAnalysts().map(a=>`<option ${a===cur?'selected':''}>${a}</option>`).join('');}
+function renderScmStats(){let nao=0,and=0,conc=0;SCM_COMPANIES.forEach(c=>{const k=scmStatusOf(c.id).k;if(k==='nao')nao++;else if(k==='andamento')and++;else conc++;});document.getElementById('scmStatRow').innerHTML=`<div class="stat cyan"><div class="n">${SCM_COMPANIES.length}</div><div class="l">Empresas SCM+ em gestão</div></div><div class="stat"><div class="n">${nao}</div><div class="l">Não iniciadas</div></div><div class="stat amber"><div class="n">${and}</div><div class="l">Em andamento</div></div><div class="stat green"><div class="n">${conc}</div><div class="l">Entregáveis concluídos</div></div>`;}
+function renderScmTable(){
+  const q=(document.getElementById('scmSearch').value||'').toLowerCase().trim();
+  const fa=document.getElementById('scmFilterAnalista').value;const fs=document.getElementById('scmFilterStatus').value;
+  const lgpdCnpjs=new Set(COMPANIES.map(c=>c.cnpj));
+  const rows=SCM_COMPANIES.filter(c=>{if(q&&!((c.razao||'').toLowerCase().includes(q)||(c.cnpj||'').toLowerCase().includes(q)))return false;if(fa&&c.analista!==fa)return false;if(fs&&scmStatusOf(c.id).k!==fs)return false;return true;});
+  document.getElementById('scmEmpty').style.display=rows.length?'none':'block';
+  const tb=document.querySelector('#tblScm tbody');
+  tb.innerHTML=rows.map((c,i)=>{const pr=scmProgress(c.id),st=scmStatusOf(c.id);return `<tr><td style="color:var(--muted);font-weight:700">${c.id}</td><td><b>${c.razao}</b>${c.is_nova?'<span class="nova-tag">Empresa Nova</span>':''}${lgpdCnpjs.has(c.cnpj)?'<span class="also-tag">também na carteira LGPD</span>':''}<div class="cnpj">${c.cnpj||'—'}</div></td><td class="analista-cell"><select data-scmemp="${c.id}" class="selScmAnalista">${scmAnalystOptions(c.analista)}</select></td><td><div style="display:flex;align-items:center;gap:9px"><div class="progress" style="flex:1"><i style="width:${pr.pct}%"></i></div><b style="font-size:12.5px;color:var(--navy)">${pr.pct}%</b></div></td><td><span class="status-badge ${st.cl}">${st.label}</span></td><td><span class="row-open" data-scmopen="${c.id}">Abrir →</span></td></tr>`;}).join('');
+  tb.querySelectorAll('.selScmAnalista').forEach(s=>s.addEventListener('change',async e=>{await scmSaveCompany(+e.target.dataset.scmemp,{analista:e.target.value});renderScmAll();toast('Analista responsável atualizado.');}));
+  tb.querySelectorAll('[data-scmopen]').forEach(b=>b.addEventListener('click',()=>openScmDrawer(+b.dataset.scmopen)));
+}
+function openScmDrawer(id){SCM_CURRENT=id;const c=scmComp(id);document.getElementById('dEk').textContent='Empresa SCM+ #'+c.id+' · '+scmStatusOf(id).label;document.getElementById('dRazao').innerHTML=c.razao+(c.is_nova?'<span class="nova-tag">Empresa Nova</span>':'');document.getElementById('dCnpj').textContent=c.cnpj||'—';document.getElementById('dSituacao').textContent=c.situacao||'ATIVO';renderScmDrawer(id);document.getElementById('overlay').classList.add('open');document.getElementById('drawer').classList.add('open');}
+function scmTaskHtml(cid,it){
+  const s=scmState(cid,it.id);const done=s.status==='concluido';const na=s.status==='na';
+  let pf='';if(!done&&!na&&s.pendencia){pf=`<span class="pend-flag ${s.pendencia==='analista'?'pf-analista':'pf-prestadora'}">⚑ Pendente: ${s.pendencia==='analista'?'Analista':'Prestadora'}</span>`;}
+  return `<div class="task ${done?'done':''} ${na?'na':''}" data-task="${it.id}"><div class="t-top"><div class="t-check" data-scmcheck="${it.id}">✓</div><div class="t-main"><div class="t-name">${it.nome}</div><div class="t-sub"><span class="scm-ref">1.2.4 (${it.ref})</span>${it.fmt}</div><span class="t-resp ${RESP_CLASS[it.resp]}">${RESP_LABEL[it.resp]}</span>${pf}</div><button class="t-expand" data-expand="${it.id}">editar</button></div><div class="t-controls"><div><label>Status</label><select data-sf="status" data-id="${it.id}"><option value="nao" ${s.status==='nao'?'selected':''}>Não iniciado</option><option value="andamento" ${s.status==='andamento'?'selected':''}>Em andamento</option><option value="concluido" ${s.status==='concluido'?'selected':''}>Concluído</option><option value="na" ${s.status==='na'?'selected':''}>Não aplicável</option></select></div><div><label>Pendência por conta de</label><select data-sf="pendencia" data-id="${it.id}"><option value="" ${s.pendencia===''?'selected':''}>— sem pendência —</option><option value="analista" ${s.pendencia==='analista'?'selected':''}>Analista (Solintel)</option><option value="prestadora" ${s.pendencia==='prestadora'?'selected':''}>Prestadora (ISP)</option></select></div><div><label>Data (conclusão / prazo)</label><input type="date" data-sf="data" data-id="${it.id}" value="${s.data||''}"></div><div class="full"><label>Anotações</label><textarea data-sf="anotacoes" data-id="${it.id}" placeholder="Observações, links, próximos passos...">${s.anotacoes||''}</textarea></div></div></div>`;
+}
+function renderScmDrawer(id){
+  const c=scmComp(id);const pr=scmProgress(id);
+  let html=`
+  <div class="field-row"><div class="field"><label>Analista Responsável</label><select id="sAnalista">${scmAnalystOptions(c.analista)}</select></div><div class="field"><label>Condição (observação)</label><input id="sCond" value="${(c.condicao||'').replace(/"/g,'&quot;')}" placeholder="ex.: Documentos enviados"></div></div>
+  <div class="dpo-box"><div class="lbl">⛨ Encarregado de Dados (DPO) da Prestadora</div><div class="dpo-grid"><div><label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px">NOME COMPLETO</label><input id="sDpoNome" value="${(c.dpo_nome||'').replace(/"/g,'&quot;')}" placeholder="Nome completo do DPO"></div><div><label style="font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px">CONTATO (e-mail / telefone)</label><input id="sDpoContato" value="${(c.dpo_contato||'').replace(/"/g,'&quot;')}" placeholder="email@empresa.com · (00) 0000-0000"></div></div></div>
+  <div class="prog-summary"><div class="big">${pr.pct}%</div><div class="pbar"><div class="progress"><i style="width:${pr.pct}%"></i></div><div class="counts"><span><b>${pr.done}</b> concluídos</span><span><b>${pr.applicable-pr.done}</b> pendentes</span><span><b>${pr.total-pr.applicable}</b> N/A</span><span>Entregáveis LGPD · SCM+</span></div></div></div>
+  <div class="note">Escopo da <b>Quarta Modalidade</b> do contrato SCM+ (cl. 1.2.4): apoio orientativo à adequação à LGPD, com cartilhas no lugar do mapeamento e da matriz de risco elaborados pela Solintel na Gestão LGPD convencional.</div>
+  <div class="sec-title"><span class="bar"></span>Checklist de Entregáveis LGPD · SCM+</div>`;
+  html+=SCM_GROUPS.map(g=>`<div class="phase-group" data-pg="${g.id}"><div class="pg-head" data-toggle="${g.id}"><div class="pg-ic">${g.n}</div><h4>${g.nome}</h4><span class="pg-when">${g.when}</span><span class="chev">▾</span></div><div class="pg-items">${g.items.map(it=>scmTaskHtml(id,{...it,group:g})).join('')}</div></div>`).join('');
+  const body=document.getElementById('drawerBody');body.innerHTML=html;
+  document.getElementById('sAnalista').addEventListener('change',e=>{scmSaveCompany(id,{analista:e.target.value});toast('Analista atualizado.');});
+  document.getElementById('sCond').addEventListener('change',e=>scmSaveCompany(id,{condicao:e.target.value}));
+  document.getElementById('sDpoNome').addEventListener('change',e=>scmSaveCompany(id,{dpo_nome:e.target.value}));
+  document.getElementById('sDpoContato').addEventListener('change',e=>scmSaveCompany(id,{dpo_contato:e.target.value}));
+  body.querySelectorAll('[data-toggle]').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
+  const findScm=iid=>SCM_ITEMS.find(x=>x.id===iid);
+  body.querySelectorAll('[data-scmcheck]').forEach(el=>el.addEventListener('click',async()=>{const it=findScm(el.dataset.scmcheck);const s=scmState(id,it.id);const ns=s.status==='concluido'?'andamento':'concluido';const patch={status:ns};if(ns==='concluido'){if(!s.data)patch.data=new Date().toISOString().slice(0,10);patch.pendencia='';}await scmSaveItem(id,it,patch);refreshScmDrawer(id);}));
+  body.querySelectorAll('[data-expand]').forEach(b=>b.addEventListener('click',()=>b.closest('.task').classList.toggle('expanded')));
+  body.querySelectorAll('[data-sf]').forEach(el=>el.addEventListener('change',async()=>{const it=findScm(el.dataset.id);const patch={};patch[el.dataset.sf]=el.value;if(el.dataset.sf==='status'&&el.value==='concluido'){const s=scmState(id,it.id);if(!s.data)patch.data=new Date().toISOString().slice(0,10);patch.pendencia='';}await scmSaveItem(id,it,patch);if(el.dataset.sf==='status')refreshScmDrawer(id);}));
+}
+function refreshScmDrawer(id){
+  const expanded=Array.from(document.querySelectorAll('.task.expanded')).map(t=>t.dataset.task);
+  const collapsed=Array.from(document.querySelectorAll('.phase-group.collapsed')).map(g=>g.dataset.pg);
+  renderScmDrawer(id);
+  expanded.forEach(t=>{const e=document.querySelector(`.task[data-task="${t}"]`);if(e)e.classList.add('expanded');});
+  collapsed.forEach(p=>{const g=document.querySelector(`.phase-group[data-pg="${p}"]`);if(g)g.classList.add('collapsed');});
+  document.getElementById('dEk').textContent='Empresa SCM+ #'+id+' · '+scmStatusOf(id).label;
+}
+document.getElementById('scmSearch').addEventListener('input',renderScmTable);
+document.getElementById('scmFilterAnalista').addEventListener('change',renderScmTable);
+document.getElementById('scmFilterStatus').addEventListener('change',renderScmTable);
+document.getElementById('scmReload').addEventListener('click',async()=>{try{await loadScm();SCM_READY=true;renderScmAll();toast('Carteira SCM+ atualizada.');}catch(e){toast('Falha ao atualizar a carteira SCM+.');}});
+document.getElementById('scmPrint').addEventListener('click',()=>window.print());
 
 /* ====== TOAST ====== */
 let toastT;function toast(m){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
@@ -739,6 +888,7 @@ async function startApp(email){
     dbStatus('ok','Conectado · <b>'+COMPANIES.length+' empresas</b> · sessão segura ('+ (email||'') +').');
     if(window.SHEET_CSV_URL && window.SHEET_CSV_URL.indexOf('COLE_')!==0){ syncSheet(true); }
   }catch(e){dbStatus('err','Erro ao carregar do Supabase: '+(e.message||e));toast('Falha ao carregar dados.');}
+  startScm();
 }
 async function doAuth(){
   const email=document.getElementById('authEmail').value.trim();
